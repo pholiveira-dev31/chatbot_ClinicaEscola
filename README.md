@@ -47,3 +47,47 @@ Certifique-se de ter instalado no seu computador:
    ```bash
    git clone <URL_DO_SEU_REPOSITORIO>
    cd <NOME_DA_PASTA>
+
+Instale as dependências do projeto:
+
+Bash
+npm install @whiskeysockets/baileys qrcode-terminal
+
+Inicie o bot principal:
+
+Bash
+node bot.js
+
+📌 Nota: Na primeira execução, será gerado um QR Code no terminal. Abra o WhatsApp no celular que será usado pelo bot, acesse Aparelhos Conectados > Conectar um Aparelho e aponte a câmera para o terminal.
+
+🧪 6. Simulador de Terminal (Testes sem Celular)
+Se você quiser testar os menus, fluxos e regras de negócio rapidamente direto pelo teclado do seu computador sem conectar um celular real:
+
+Bash
+node teste-terminal.js
+Digite os números correspondentes às opções no terminal para simular as conversas e respostas do robô.
+
+🔄 7. Execução Contínua 24/7 (Produção)
+Para garantir que o bot funcione ininterruptamente em um servidor Linux (sem cair ao fechar a sessão SSH e reiniciando automaticamente em caso de falhas), recomenda-se o uso do PM2:
+Instale o PM2 globalmente no servidor:
+
+Bash
+npm install -g pm2
+
+Inicie o bot pelo PM2:
+
+Bash
+pm2 start bot.js --name "bot-clinica"
+
+Configure para iniciar automaticamente caso o servidor seja reiniciado:
+
+Bash
+pm2 startup
+pm2 save
+
+Comandos úteis do PM2:
+pm2 status — Verifica se o bot está ativo.
+
+pm2 logs bot-clinica — Acompanha os logs e cards da recepção em tempo real.
+
+pm2 restart bot-clinica — Reinicia a aplicação.
