@@ -1,13 +1,25 @@
+// ==============================================================================
+// 🧪 SIMULADOR DE TERMINAL - BOT CLÍNICA ESCOLA CPTL/UFMS
+// ==============================================================================
+// Este script simula exatamente a mesma lógica do 'bot.js', mas sem precisar
+// de internet, WhatsApp ou celular. Ele lê o que você digita no teclado do PC!
+// ==============================================================================
+
+// Módulo nativo do Node.js para ler entradas (teclado) e saídas (tela)
 const readline = require('readline');
 
+// Configura a interface do leitor de terminal
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
+// Banco de dados em memória para manter a sessão simulada
 const userSessions = {};
+// Número de telefone simulado para os testes
 const FROM_SIMULATED = "5567999999999@s.whatsapp.net";
 
+// Garante que a sessão do usuário de teste existe
 function getSession() {
     if (!userSessions[FROM_SIMULATED]) {
         userSessions[FROM_SIMULATED] = {
@@ -19,14 +31,17 @@ function getSession() {
     return userSessions[FROM_SIMULATED];
 }
 
+// Função auxiliar para simular o envio de mensagem do bot na tela
 function sendBotMessage(text) {
     console.log(`\n🤖 BOT:\n${text}\n`);
 }
 
+// Função auxiliar para exibir na tela como o card chegará para a recepção
 function logReceptionCard(cardText) {
     console.log(`\n📩 [TELA DA RECEPÇÃO - CARD DE NOTIFICAÇÃO]:\n${cardText}\n`);
 }
 
+// Exibe a mensagem do menu principal
 function sendMainMenu() {
     const menuText = 
 `🏥 *CLÍNICA ESCOLA CPTL/UFMS - ATENDIMENTO DIGITAL*
@@ -46,11 +61,13 @@ _(Digite # ou MENU a qualquer momento para voltar a este menu)_`;
     sendBotMessage(menuText);
 }
 
+// Função que recebe o que o usuário digitou no terminal e decide a resposta
 function processInput(inputText) {
     const text = inputText.trim();
     const session = getSession();
     const lowerText = text.toLowerCase();
 
+    // Palavras que forçam a volta ao menu principal
     const resetKeywords = ['#', 'menu', 'voltar', 'inicio', 'início', 'oi', 'ola', 'olá', 'bot'];
     if (resetKeywords.includes(lowerText)) {
         session.state = 'MAIN_MENU';
@@ -59,11 +76,13 @@ function processInput(inputText) {
         return;
     }
 
+    // Se estiver em modo de atendimento humano
     if (session.state === 'HUMAN_ATTENDANCE') {
         sendBotMessage("⚠️ O atendimento está em modo HUMANO. Para reativar o robô automático, digite # ou MENU.");
         return;
     }
 
+    // Árvore de decisão baseada nos estados
     switch (session.state) {
         case 'START':
             session.state = 'MAIN_MENU';
@@ -115,7 +134,7 @@ function processInput(inputText) {
             }
             break;
 
-        /* --- AGENDAMENTO --- */
+        /* --- FLUXO 1: AGENDAMENTO --- */
         case 'AGENDAMENTO_TIPO_USER':
             if (['1', '2', '3'].includes(text)) {
                 session.data.tipoUsuario = text === '1' ? 'Aluno UFMS/CPTL' : text === '2' ? 'Servidor/Familiar UFMS' : 'Terceirizado UFMS';
@@ -156,7 +175,7 @@ function processInput(inputText) {
             session.state = 'HUMAN_ATTENDANCE';
             break;
 
-        /* --- RETORNO MÉDICO --- */
+        /* --- FLUXO 2: RETORNO MÉDICO --- */
         case 'RETORNO_TIPO':
             if (['1', '2'].includes(text)) {
                 session.data.tipoRetorno = text;
@@ -199,7 +218,7 @@ function processInput(inputText) {
             session.state = 'HUMAN_ATTENDANCE';
             break;
 
-        /* --- EXAMES --- */
+        /* --- FLUXO 3: EXAMES --- */
         case 'EXAMES_OPCAO':
             if (text === '1') {
                 sendBotMessage(`Para consultar o status da solicitação ou posição na fila da regulação, confira em:\nhttps://sisreg-transparencia.treslagoas.ms.gov.br/\n\n_(Digite # a qualquer momento para voltar ao menu automático)_`);
@@ -232,11 +251,16 @@ function processInput(inputText) {
     }
 }
 
+// ------------------------------------------------------------------------------
+// 🏃 INICIALIZAÇÃO DO SIMULADOR
+// ------------------------------------------------------------------------------
 console.log("=== SIMULADOR DE TESTE DO BOT DA CLÍNICA ESCOLA ===");
 console.log("Digite qualquer mensagem para iniciar ou interagir. Digite 'sair' para encerrar.\n");
 
+// Inicia automaticamente enviando a mensagem de boas-vindas
 processInput("oi");
 
+// Fica escutando cada linha que for digitada no teclado
 rl.on('line', (line) => {
     if (line.trim().toLowerCase() === 'sair') {
         rl.close();
