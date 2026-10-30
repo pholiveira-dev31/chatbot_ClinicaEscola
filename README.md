@@ -58,6 +58,7 @@ npm install @whiskeysockets/baileys qrcode-terminal
 node bot.js
 ```
 📌 Nota: Na primeira execução, será gerado um QR Code no terminal. Abra o WhatsApp no celular que será usado pelo bot, acesse Aparelhos Conectados > Conectar um Aparelho e aponte a câmera para o terminal.
+
 ❗ Recomendações Importantes para Testes e Execução Para garantir uma transição segura, evitar bloqueios e proteger a conta de WhatsApp utilizada, siga atentamente as recomendações abaixo antes de colocar o bot em funcionamento real:
 
 * Validação Inicial pelo Terminal (Obrigatório):
