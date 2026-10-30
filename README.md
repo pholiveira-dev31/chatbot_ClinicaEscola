@@ -1,22 +1,22 @@
 # 🤖 Bot de Atendimento WhatsApp - Clínica Escola CPTL/UFMS
 
-Repositório oficial do assistente virtual de triagem e acolhimento da Clínica Escola do Câmpus de Três Lagoas (CPTL/UFMS). O sistema automatiza o primeiro atendimento via WhatsApp, orientando pacientes sobre agendamentos, retornos, exames e encaminhamentos.
+Repositório oficial do assistente virtual de triagem e acolhimento da Clínica Escola do Câmpus de Três Lagoas (CPTL/UFMS). O sistema automatiza o primeiro atendimento via WhatsApp, orientando pacientes sobre agendamentos, retornos, exames, encaminhamentos e atendimento humano.
 
 ---
 
 ## 📋 Sumário
-1. [Sobre o Projeto](#sobre-o-projeto)
-2. [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
-3. [Estrutura de Ficheiros](#estrutura-de-ficheiros)
-4. [Pré-requisitos](#pré-requisitos)
-5. [Como Executar o Projeto](#como-executar-o-projeto)
-6. [Simulador de Terminal (Testes sem Celular)](#simulador-de-terminal-testes-sem-celular)
-7. [Execução Contínua 24/7 (Produção)](#execução-contínua-247-produção)
+* [Sobre o Projeto](#-1-sobre-o-projeto)
+* [Arquitetura e Tecnologias](#%EF%B8%8F-2-arquitetura-e-tecnologias)
+* [Estrutura de Arquivos](#-3-estrutura-de-arquivos)
+* [Pré-requisitos](#%EF%B8%8F-4-pré-requisitos)
+* [Como Executar o Projeto](#-5-como-executar-o-projeto)
+* [Simulador de Terminal (Testes sem Celular)](#-6-simulador-de-terminal-testes-sem-celular)
+* [Execução Contínua 24/7 (Produção)](#-7-execução-contínua-247-produção)
 
 ---
 
 ## 💡 1. Sobre o Projeto
-O bot foi desenvolvido para otimizar o fluxo de atendimento da recepção da Clínica Escola. Ele funciona através de uma árvore de decisão conversacional baseada em estados (`session.state`), coletando dados essenciais de forma estruturada e gerando cartões de atendimento (logs formatados) para a equipe humana quando necessário.
+O bot foi desenvolvido para otimizar o fluxo de atendimento da recepção da Clínica Escola. Ele funciona através de uma árvore de decisão conversacional baseada em máquina de estados finitos (`session.state`), coletando dados essenciais de forma estruturada e gerando cartões de atendimento (logs formatados no console) para a equipe da recepção quando necessário.
 
 ---
 
@@ -27,23 +27,23 @@ O bot foi desenvolvido para otimizar o fluxo de atendimento da recepção da Cl�
 
 ---
 
-## 📂 3. Estrutura de Ficheiros
+## 📂 3. Estrutura de Arquivos
 * `bot.js` — Script principal de produção integrado ao WhatsApp via conexão QR Code.
-* `teste-terminal.js` — Simulador interativo de terminal para validar os menus e regras de negócio sem precisar de um telemóvel conectado.
+* `teste-terminal.js` — Simulador interativo de terminal para validar os menus e regras de negócio sem precisar de um celular conectado.
 * `package.json` — Dependências e configurações do projeto.
 
 ---
 
 ## ⚙️ 4. Pré-requisitos
-Certifica-te de ter instalado no teu computador:
-* [Node.js](https://nodejs.org/) (versão 18+)
+Certifique-se de ter instalado no seu computador:
+* [Node.js](https://nodejs.org/) (versão 18 ou superior)
 * Git
 
 ---
 
 ## 🚀 5. Como Executar o Projeto
 
-1. Clona o repositório e entra na pasta:
+1. Clone o repositório e acesse a pasta do projeto:
    ```bash
-   git clone <url-do-teu-repositorio>
-   cd <nome-da-pasta>
+   git clone <URL_DO_SEU_REPOSITORIO>
+   cd <NOME_DA_PASTA>
