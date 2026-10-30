@@ -12,6 +12,7 @@ Repositório oficial do assistente virtual de triagem e acolhimento da Clínica 
 * [Como Executar o Projeto](#-5-como-executar-o-projeto)
 * [Simulador de Terminal (Testes sem Celular)](#-6-simulador-de-terminal-testes-sem-celular)
 * [Execução Contínua 24/7 (Produção)](#-7-execução-contínua-247-produção)
+* [Reset de Sessão (QR Code Novo)](#-8-reset-de-sessão-qr-code-novo)
 
 ---
 
@@ -84,7 +85,17 @@ pm2 save
 ```
 Comandos úteis do PM2:
 pm2 status — Verifica se o bot está ativo.
-
 pm2 logs bot-clinica — Acompanha os logs e cards da recepção em tempo real.
-
 pm2 restart bot-clinica — Reinicia a aplicação.
+
+🧹 8. Reset de Sessão (QR Code Novo)
+Se precisar desconectar o WhatsApp atual e gerar um novo QR Code, apague a pasta de credenciais gerada pelo Baileys:
+Linux / macOS:
+```bash
+rm -rf auth_info_baileys
+```
+
+Windows (PowerShell):
+```bash
+Remove-Item -Recurse -Force auth_info_baileys
+```
