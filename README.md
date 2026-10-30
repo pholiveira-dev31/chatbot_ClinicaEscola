@@ -26,6 +26,7 @@ O bot foi desenvolvido para otimizar o fluxo de atendimento da recepção da Cl�
 * Custo Operacional: Sem cobrança de tarifas por template ou por mensagem ativa/passiva, demandando apenas a persistência de sessão via QR Code.
 
 1.2 Arquitetura Orientada a Estados
+
 O bot adota uma máquina de estados finitos (FSM) em memória gerenciada por sessão individualizada via JID (remoteJid). O atributo session.state guia o fluxo de navegação do usuário de forma conversacional e determinística:
 * Sessão Persistente: Mapeada por número de telefone para evitar cruzamento de dados de pacientes.
 * Fallback e Reset: Estados possuem timeouts e gatilhos para retorno facilitado ao menu inicial (Opção 0 ou comandos de cancelamento).
