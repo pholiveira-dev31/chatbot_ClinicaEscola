@@ -62,18 +62,27 @@ node bot.js
 ❗ Recomendações Importantes para Testes e Execução Para garantir uma transição segura, evitar bloqueios e proteger a conta de WhatsApp utilizada, siga atentamente as recomendações abaixo antes de colocar o bot em funcionamento real:
 
 * Validação Inicial pelo Terminal (Obrigatório):
+
 Antes de ligar o bot no WhatsApp real, utilize sempre o script simulador (teste-terminal.js) para validar todas as árvores de decisão, menus e regras de negócio de forma isolada direto no teclado.  
 
 * Utilize um Número Secundário / Em Desuso:
-Nunca realize os testes iniciais utilizando o seu número pessoal ou o número principal de atendimento da clínica.Utilize um número secundário, um chip pré-pago dedicado ou uma linha em desuso. Isso previne transtornos caso ocorra qualquer imprevisto com a automação.
+
+Nunca realize os testes iniciais utilizando o seu número pessoal ou o número principal de atendimento da clínica.
+
+Utilize um número secundário, um chip pré-pago dedicado ou uma linha em desuso. Isso previne transtornos caso ocorra qualquer imprevisto com a automação.
 
 * Cuidados com o Algoritmo do WhatsApp (Antispam):
-Números novos ou recém-ativados que começam a disparar e responder mensagens em massa de forma automatizada podem ser sinalizados pelos filtros de segurança da plataforma.Se possível, utilize um número que já tenha um mínimo de "aquecimento" (histórico prévio de uso manual de conversas) antes de conectar o bot.
+
+Números novos ou recém-ativados que começam a disparar e responder mensagens em massa de forma automatizada podem ser sinalizados pelos filtros de segurança da plataforma.
+
+Se possível, utilize um número que já tenha um mínimo de "aquecimento" (histórico prévio de uso manual de conversas) antes de conectar o bot.
 
 * Mantenha os Backups em Dia:
+
 Caso utilize uma conta que já possua histórico de conversas importantes, certifique-se de realizar um backup completo das mensagens antes de vincular a sessão ao código do Baileys.
 
 * Proteção de Credenciais e Segurança do Código (.gitignore):Atenção:
+
 Nunca envie a pasta de sessão (auth_info_baileys) para repositórios públicos no GitHub. Ela funciona como a chave de acesso criptografada da sua conta do WhatsApp. Certifique-se de que essa pasta está incluída no arquivo .gitignore do seu projeto.
 
 ## 🧪 6. Simulador de Terminal (Testes sem Celular)
