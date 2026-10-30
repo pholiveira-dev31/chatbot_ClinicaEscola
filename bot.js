@@ -1,99 +1,155 @@
+// ==============================================================================
+// 🤖 BOT DE WHATSAPP - CLÍNICA ESCOLA CPTL/UFMS (CÓDIGO PRINCIPAL / PRODUÇÃO)
+// ==============================================================================
+// Este código conecta um número de WhatsApp ao servidor e responde automaticamente
+// às mensagens dos usuários utilizando a biblioteca Baileys.
+// ==============================================================================
+
+// ------------------------------------------------------------------------------
+// 📦 IMPORTAÇÃO DE MÓDULOS (BIBLIOTECAS)
+// ------------------------------------------------------------------------------
+// 'makeWASocket': Função principal do Baileys para criar a conexão com o WhatsApp.
+// 'useMultiFileAuthState': Salva e carrega as credenciais (login) em uma pasta local.
+// 'DisconnectReason': Lista de motivos padrão para queda ou fechamento de conexão.
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+
+// 'qrcode-terminal': Biblioteca responsável por desenhar o QR Code direto no console/terminal.
 const qrcode = require('qrcode-terminal');
 
-// Armazenamento de sessões/estados dos usuários
+// ------------------------------------------------------------------------------
+// 🧠 ARMAZENAMENTO DE SESSÕES E ESTADOS EM MEMÓRIA
+// ------------------------------------------------------------------------------
+// Objeto JavaScript que guardará as informações temporárias de cada número que fala com o bot.
+// Estrutura: { "5567999999999@s.whatsapp.net": { state: 'MAIN_MENU', data: {}, lastInteraction: 12345678 } }
 const userSessions = {};
 
-// Configuração do horário de atendimento (Segunda a Sexta, 07h-11h e 13h-17h)
+// ------------------------------------------------------------------------------
+// 🕒 FUNÇÃO DE VERIFICAÇÃO DE HORÁRIO DE EXPEDIENTE
+// ------------------------------------------------------------------------------
+// Retorna 'true' se estiver no horário de funcionamento ou 'false' se estiver fora.
+// Horários: Segunda a Sexta, das 07h às 11h e das 13h às 17h.
 function isBusinessHours() {
     const now = new Date();
-    const day = now.getDay(); // 0 = Domingo, 6 = Sábado
+    const day = now.getDay(); // Retorna o dia da semana: 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+
+    // Se for Sábado (6) ou Domingo (0), não há expediente
     if (day === 0 || day === 6) return false;
 
-    const hour = now.getHours();
+    const hour = now.getHours(); // Pega a hora atual (0 a 23)
+
+    // Verifica se está no intervalo da manhã (7h às 10h59) ou da tarde (13h às 16h59)
     return (hour >= 7 && hour < 11) || (hour >= 13 && hour < 17);
 }
 
-// Timeout de Inatividade (12 Horas)
-const INACTIVITY_TIMEOUT_MS = 12 * 60 * 60 * 1000;
+// ------------------------------------------------------------------------------
+// ⏱️ TIMEOUT DE INATIVIDADE (12 HORAS)
+// ------------------------------------------------------------------------------
+// Define o tempo máximo (em milissegundos) que uma conversa pode ficar parada antes de resetar.
+const INACTIVITY_TIMEOUT_MS = 12 * 60 * 60 * 1000; // 12 horas em milissegundos
 
 function checkAndResetInactivity(from) {
     const session = userSessions[from];
     if (session && session.lastInteraction) {
         const now = Date.now();
+        // Se a diferença entre o tempo atual e a última mensagem for maior que 12h:
         if (now - session.lastInteraction > INACTIVITY_TIMEOUT_MS) {
-            delete userSessions[from];
+            delete userSessions[from]; // Apaga a sessão antiga para recomeçar do zero
             console.log(`⏱️ Sessão de ${from} restaurada por inatividade (timeout de 12h).`);
         }
     }
 }
 
-let qrJaExibido = false; // Controle de QR Code único
+// Variável de controle para evitar a impressão duplicada de QR Codes na tela
+let qrJaExibido = false;
 
+// ------------------------------------------------------------------------------
+// 🚀 FUNÇÃO PRINCIPAL DE CONEXÃO COM O WHATSAPP
+// ------------------------------------------------------------------------------
 async function connectToWhatsApp() {
+    // Carrega ou cria os arquivos de autenticação na pasta 'auth_info_baileys'
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
+    // Inicializa a conexão via WebSocket
     const sock = makeWASocket({
         auth: state,
-        printQRInTerminal: false
+        printQRInTerminal: false // Desativamos o padrão para formatar manualmente abaixo
     });
 
+    // Salva as credenciais sempre que houver atualização (ex: tokens renovados)
     sock.ev.on('creds.update', saveCreds);
 
+    // --------------------------------------------------------------------------
+    // 📡 EVENTO: ATUALIZAÇÃO NO STATUS DA CONEXÃO
+    // --------------------------------------------------------------------------
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
 
+        // Se o servidor enviou um QR Code e ele ainda não foi exibido na tela:
         if (qr && !qrJaExibido) {
             qrJaExibido = true;
             console.log('\n==================================================');
             console.log('📌 QR CODE GERADO COM SUCESSO!');
-            console.log('Aguardando a clínica escanear...');
+            console.log('Aguardando a clínica escanear com o celular...');
             console.log('==================================================\n');
-            qrcode.generate(qr, { small: true });
+            qrcode.generate(qr, { small: true }); // Desenha o QR Code pequeno no terminal
         }
 
+        // Se a conexão foi fechada (por queda de internet, restart, etc.):
         if (connection === 'close') {
+            // Descobre se o desconecte permite reconexão (ex: se não foi logout do celular)
             const shouldReconnect = (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut);
             console.log('Conexão fechada. Reconectando...', shouldReconnect);
             if (shouldReconnect) {
-                connectToWhatsApp();
+                connectToWhatsApp(); // Executa a função novamente para tentar reconectar
             }
         } else if (connection === 'open') {
-            qrJaExibido = false;
+            qrJaExibido = false; // Reseta a trava do QR Code
             console.log('✅ Bot da Clínica Escola CPTL/UFMS conectado ao WhatsApp com sucesso!');
         }
     });
 
+    // --------------------------------------------------------------------------
+    // 📩 EVENTO: RECEBIMENTO DE NOVAS MENSAGENS
+    // --------------------------------------------------------------------------
     sock.ev.on('messages.upsert', async (m) => {
-        const msg = m.messages[0];
+        const msg = m.messages[0]; // Pega a primeira mensagem enviada
+        
+        // Ignora se a mensagem estiver vazia ou se foi o próprio bot que enviou
         if (!msg.message || msg.key.fromMe) return;
 
-        const from = msg.key.remoteJid;
+        const from = msg.key.remoteJid; // Identificador único do remetente (ex: 55679999@s.whatsapp.net)
+        
+        // Extrai o texto da mensagem (funciona para texto simples ou mensagens estendidas)
         const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').trim();
 
+        // Passa pelo filtro de inatividade de 12h
         checkAndResetInactivity(from);
 
+        // Se o usuário nunca conversou com o bot, cria uma nova sessão para ele
         if (!userSessions[from]) {
             userSessions[from] = {
-                state: 'START',
-                data: {},
+                state: 'START',           // Estado inicial da máquina de estados
+                data: {},                // Objeto para guardar dados temporários (nome, CPF, etc.)
                 lastInteraction: Date.now()
             };
         }
 
+        // Atualiza a hora do último contato do usuário
         userSessions[from].lastInteraction = Date.now();
         const session = userSessions[from];
 
         const lowerText = text.toLowerCase();
+        // Palavras-chave de atalho para reiniciar a conversa a qualquer momento
         const resetKeywords = ['#', 'menu', 'voltar', 'inicio', 'início', 'oi', 'ola', 'olá', 'bot'];
         
         if (resetKeywords.includes(lowerText)) {
             session.state = 'MAIN_MENU';
-            session.data = {};
+            session.data = {}; // Limpa dados acumulados
             await sendMainMenu(sock, from);
             return;
         }
 
+        // Se for o primeiro contato do usuário e estiver fora do horário comercial:
         if (session.state === 'START' && !isBusinessHours()) {
             await sock.sendMessage(from, {
                 text: "⚠️ *Aviso de Expediente*:\n\nNosso horário de atendimento é de *segunda a sexta-feira, das 07h às 11h e das 13h às 17h*.\n\nSua mensagem foi recebida e responderemos assim que o expediente for iniciado."
@@ -103,14 +159,19 @@ async function connectToWhatsApp() {
             return;
         }
 
+        // Se a conversa já foi transferida para a recepção (humano), o bot não interfere mais
         if (session.state === 'HUMAN_ATTENDANCE') {
             return;
         }
 
+        // Processa a resposta do usuário de acordo com o estado atual da conversa
         await handleState(sock, from, text, session);
     });
 }
 
+// ------------------------------------------------------------------------------
+// 📜 FUNÇÃO: ENVIAR O MENU PRINCIPAL
+// ------------------------------------------------------------------------------
 async function sendMainMenu(sock, from) {
     const menuText = 
 `🏥 *CLÍNICA ESCOLA CPTL/UFMS - ATENDIMENTO DIGITAL*
@@ -131,6 +192,9 @@ _(Digite # ou MENU a qualquer momento para voltar a este menu)_`;
     await sock.sendMessage(from, { text: menuText });
 }
 
+// ------------------------------------------------------------------------------
+// 🔀 MÁQUINA DE ESTADOS (MÁQUINA DE DECISÃO DO BOT)
+// ------------------------------------------------------------------------------
 async function handleState(sock, from, text, session) {
     const input = text.trim();
 
@@ -201,7 +265,9 @@ async function handleState(sock, from, text, session) {
             }
             break;
 
-        /* --- FLUXO 1: AGENDAMENTO --- */
+        /* ---------------------------------------------------------------------
+           FLUXO 1: AGENDAMENTO (Clínico Geral e Pediatria)
+        --------------------------------------------------------------------- */
         case 'AGENDAMENTO_TIPO_USER':
             if (['1', '2', '3'].includes(input)) {
                 session.data.tipoUsuario = input === '1' ? 'Aluno UFMS/CPTL' : input === '2' ? 'Servidor/Familiar UFMS' : 'Terceirizado UFMS';
@@ -238,7 +304,7 @@ async function handleState(sock, from, text, session) {
             break;
 
         case 'AGENDAMENTO_NOME':
-            session.data.nome = input.toUpperCase();
+            session.data.nome = input.toUpperCase(); // Padroniza o nome em letras maiúsculas
             session.state = 'AGENDAMENTO_CPF';
             await sock.sendMessage(from, { text: `Digite o CPF do Paciente (apenas números):` });
             break;
@@ -249,6 +315,7 @@ async function handleState(sock, from, text, session) {
                 text: `✅ *Solicitação de Agendamento registrada!*\n\nVerificaremos a disponibilidade de horário e em breve entraremos em contato.\n\n_(Digite # a qualquer momento para voltar ao menu)_`
             });
 
+            // Imprime no terminal o "Card da Recepção" com todos os dados coletados
             console.log(`
 📩 [CARD RECEPÇÃO - NOVO AGENDAMENTO]
 📌 SOLICITAÇÃO: Agendamento (${session.data.especialidade})
@@ -260,10 +327,12 @@ async function handleState(sock, from, text, session) {
             session.state = 'HUMAN_ATTENDANCE';
             break;
 
-        /* --- FLUXO 2: RETORNO MÉDICO --- */
+        /* ---------------------------------------------------------------------
+           FLUXO 2: RETORNO MÉDICO
+        --------------------------------------------------------------------- */
         case 'RETORNO_TIPO':
             if (['1', '2'].includes(input)) {
-                session.data.tipoRetorno = input; // '1' para Informação, '2' para Reagendamento
+                session.data.tipoRetorno = input; // '1' = Informação, '2' = Reagendamento
                 session.state = 'RETORNO_ESPECIALIDADE';
                 await sock.sendMessage(from, {
                     text: `Por favor, escolha a especialidade médica:\n\n1️⃣ Dermatologia\n2️⃣ Endocrinologia\n3️⃣ Ortopedia\n4️⃣ Pediatria\n5️⃣ Pneumologia`
@@ -283,6 +352,7 @@ async function handleState(sock, from, text, session) {
 
             session.data.especialidadeRetorno = espMap[input];
 
+            // Regra de negócio: Se o usuário faltou (tipo 2) e NÃO for Dermatologia, ele precisa ir para a UBS
             if (session.data.tipoRetorno === '2' && input !== '1') {
                 await sock.sendMessage(from, {
                     text: `ℹ️ Favor, reagendar a consulta em sua unidade de saúde.\n\n_(Digite # para voltar ao menu principal)_`
@@ -319,7 +389,9 @@ async function handleState(sock, from, text, session) {
             session.state = 'HUMAN_ATTENDANCE';
             break;
 
-        /* --- FLUXO 3: EXAMES --- */
+        /* ---------------------------------------------------------------------
+           FLUXO 3: EXAMES
+        --------------------------------------------------------------------- */
         case 'EXAMES_OPCAO':
             if (input === '1') {
                 await sock.sendMessage(from, {
@@ -363,4 +435,5 @@ async function handleState(sock, from, text, session) {
     }
 }
 
+// Inicializa a execução do robô
 connectToWhatsApp();
