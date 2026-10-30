@@ -19,6 +19,18 @@ Repositório oficial do assistente virtual de triagem e acolhimento da Clínica 
 ## 💡 1. Sobre o Projeto
 O bot foi desenvolvido para otimizar o fluxo de atendimento da recepção da Clínica Escola. Ele funciona através de uma árvore de decisão conversacional baseada em máquina de estados finitos (`session.state`), coletando dados essenciais de forma estruturada e gerando cartões de atendimento (logs formatados no console) para a equipe da recepção quando necessário.
 
+1.1 Stack e Protocolo de Comunicação
+-Linguagem e Runtime: Node.js (v18+).
+-Camada de Transporte: Construído utilizando a biblioteca @whiskeysockets/baileys.
+-Natureza da Conexão: Ao contrário da API oficial (Meta/WhatsApp Business Cloud API), o sistema opera emulando o protocolo binário criptografado WebSocket do WhatsApp Web.
+-Custo Operacional: Sem cobrança de tarifas por template ou por mensagem ativa/passiva, demandando apenas a persistência de sessão via QR Code.
+
+1.2 Arquitetura Orientada a Estados
+O bot adota uma máquina de estados finitos (FSM) em memória gerenciada por sessão individualizada via JID (remoteJid). O atributo session.state guia o fluxo de navegação do usuário de forma conversacional e determinística:
+-Sessão Persistente: Mapeada por número de telefone para evitar cruzamento de dados de pacientes.
+-Fallback e Reset: Estados possuem timeouts e gatilhos para retorno facilitado ao menu inicial (Opção 0 ou comandos de cancelamento).
+-Isolamento Modular: O fluxo divide-se em nós de validação (ex.: conferência de vínculos institucionais) antes de avançar para coleta de dados sensíveis ou escalonamento.
+
 ---
 
 ## 🛠️ 2. Arquitetura e Tecnologias
