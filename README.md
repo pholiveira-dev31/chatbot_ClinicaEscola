@@ -59,14 +59,14 @@ node bot.js
 ```
 📌 Nota: Na primeira execução, será gerado um QR Code no terminal. Abra o WhatsApp no celular que será usado pelo bot, acesse Aparelhos Conectados > Conectar um Aparelho e aponte a câmera para o terminal.
 
-🧪 6. Simulador de Terminal (Testes sem Celular)
+## 🧪 6. Simulador de Terminal (Testes sem Celular)
 Se você quiser testar os menus, fluxos e regras de negócio rapidamente direto pelo teclado do seu computador sem conectar um celular real:
 ```bash
 node teste-terminal.js
 ```
 Digite os números correspondentes às opções no terminal para simular as conversas e respostas do robô.
 
-🔄 7. Execução Contínua 24/7 (Produção)
+## 🔄 7. Execução Contínua 24/7 (Produção)
 Para garantir que o bot funcione ininterruptamente em um servidor Linux (sem cair ao fechar a sessão SSH e reiniciando automaticamente em caso de falhas), recomenda-se o uso do PM2:
 Instale o PM2 globalmente no servidor:
 ```bash
@@ -88,7 +88,7 @@ pm2 status — Verifica se o bot está ativo.
 pm2 logs bot-clinica — Acompanha os logs e cards da recepção em tempo real.
 pm2 restart bot-clinica — Reinicia a aplicação.
 
-🧹 8. Reset de Sessão (QR Code Novo)
+## 🧹 8. Reset de Sessão (QR Code Novo)
 Se precisar desconectar o WhatsApp atual e gerar um novo QR Code, apague a pasta de credenciais gerada pelo Baileys:
 Linux / macOS:
 ```bash
